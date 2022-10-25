@@ -1,9 +1,16 @@
 import React from 'react';
+import './Filter.scss';
 
-const Filter = ({ value, onChange }) => (
-  <label>
-    Filter bu name <input type="text" value={value} onChange={onChange} />
-  </label>
+const TodoFilter = ({ value, onChange }) => (
+  <div className="TodoFilter">
+    <p className="TodoFilter__label">Фильтр по содержимому</p>
+    <input
+      type="text"
+      className="TodoFilter__input"
+      value={value}
+      onChange={onChange}
+    />
+  </div>
 );
 
-export default Filter;
+export default TodoFilter;

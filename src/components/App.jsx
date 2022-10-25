@@ -7,7 +7,13 @@ import TodoList from './TodoList';
 import TodoEditor from './TodoEditor';
 import Filter from './Filter';
 import Container from './Container';
-import initialTodos from './todos.json';
+import Modal from './Modal';
+import IconButton from './IconButton';
+import { ReactComponent as AddIcon } from '../icons/add.svg';
+// import Clock from './Clock';
+// import initialTodos from './todos.json';
+// import Tabs from './Tabs/Tabs';
+// import tabs from './tabs.json';
 
 // const colorPickerOptions = [
 //   { label: 'red', color: '#F44336' },
@@ -20,9 +26,35 @@ import initialTodos from './todos.json';
 
 class App extends Component {
   state = {
-    todos: initialTodos,
+    // todos: initialTodos,
+    todos: [],
     filter: '',
+    showModal: false,
   };
+
+  componentDidMount() {
+    const todos = localStorage.getItem('todos');
+    const parsedTodos = JSON.parse(todos);
+
+    if (parsedTodos) {
+      this.setState({ todos: parsedTodos });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const nextTodos = this.state.todos;
+    const prevTodos = prevState.todos;
+
+    if (nextTodos !== prevTodos) {
+      console.log('Если обновилось поле todos, записывем todos в хранилище');
+
+      localStorage.setItem('todos', JSON.stringify(this.state.todos));
+    }
+
+    if (nextTodos.length > prevTodos.length && prevTodos.length !== 0) {
+      this.toggleModal();
+    }
+  }
 
   addTodo = text => {
     const todo = {
@@ -34,6 +66,8 @@ class App extends Component {
     this.setState(({ todos }) => ({
       todos: [todo, ...todos],
     }));
+
+    // this.toggleModal();
   };
 
   deleteTodo = todoId => {
@@ -83,14 +117,31 @@ class App extends Component {
     return todos.reduce((acc, todo) => (todo.completed ? acc + 1 : acc), 0);
   };
 
+  toggleModal = () => {
+    this.setState(({ showModal }) => ({
+      showModal: !showModal,
+    }));
+  };
+
   render() {
-    const { todos, filter } = this.state;
+    const { todos, filter, showModal } = this.state;
     const totalTodoCount = todos.length;
     const completedTodosCount = this.calculateCompletedRodos();
     const visibleTodos = this.getVisibleTodos();
 
     return (
       <Container>
+        <IconButton onClick={this.toggleModal} aria-label="Add todo">
+          <AddIcon width="40" height="40" />
+        </IconButton>
+
+        {/* <Tabs items={tabs} /> */}
+
+        {showModal && (
+          <Modal onClose={this.toggleModal}>
+            <TodoEditor onSubmit={this.addTodo} />
+          </Modal>
+        )}
         <div>
           <p>Total todos: {totalTodoCount}</p>
           <p>Completed todos: {completedTodosCount}</p>
@@ -99,8 +150,6 @@ class App extends Component {
         {/* <h1>Состояние компонента</h1>
       <Dropdown /> */}
         {/* <Counter /> */}
-
-        <TodoEditor onSubmit={this.addTodo} />
 
         <Filter value={filter} onChange={this.changeFilter} />
 
